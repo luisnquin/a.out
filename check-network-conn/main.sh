@@ -1,8 +1,7 @@
 #!/bin/sh
 
-check_connection() {
-	ping -c 1 8.8.8.8 >/dev/null 2>&1
-	return $?
+log() {
+	echo "[$(date -R)] $1"
 }
 
 capture_last_network_manager_logs() {
@@ -10,19 +9,42 @@ capture_last_network_manager_logs() {
 	echo "$logs"
 }
 
+check_connection() {
+	ping -c 1 8.8.8.8 >/dev/null 2>&1
+	return $?
+}
+
+evaluate_conn_recover() {
+	if [ "$1" = "0" ]; then
+		return 1
+	fi
+
+	log "Evaluating network recovery, $1 attempt(s) left..."
+
+	if check_connection; then
+		return 0
+	fi
+
+	sleep "$2"
+
+	evaluate_conn_recover $(($1 - 1)) "$2"
+}
+
 while true; do
 	if ! check_connection; then
-		echo "No network connection"
+		log "I've lost network connection, trying again..."
+		if ! evaluate_conn_recover 5 3; then
+			log "Definitely lost network connection"
+			break
+		fi
 
-		break
+		log "Connection recovered"
 	else
-		echo "[$(date -R)] I didn't lost connection yet"
+		log "I didn't lost connection yet"
 	fi
 
 	sleep 2
 done
-
-echo "[$(date -R)] I've lost network connection"
 
 notify-send "You've lost network connection" "Check your terminal to see the logs" -a "Check network connection script" -u critical
 
