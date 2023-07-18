@@ -1,0 +1,16 @@
+{
+    "name": "refresh-argocd-apps",
+    "description": "Refresh ArgoCD applications",
+    "version": "1.0.0",
+    "main": "index.js",
+    "keywords": [
+        "argocd"
+    ],
+    "type": "module",
+    "author": "luisnquin",
+    "license": "ISC",
+    "dependencies": {
+        "chalk": "^5.3.0",
+        "es-main": "^1.2.0"
+    }
+}
